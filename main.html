@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roleta da Tabuada</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>Roleta da Tabuada 🎯</h2>
+
+        <div class="wheel-container">
+            <div class="wheel" id="wheel">?</div>
+        </div>
+
+        <button id="spinBtn">Girar Roleta</button>
+
+        <div id="questionArea" class="hidden">
+            <p id="question"></p>
+
+            <div id="options"></div>
+
+            <p id="timer">⏱️ Tempo: <span id="time">30</span>s</p>
+        </div>
+
+        <div id="feedback" class="hidden"></div>
+
+        <button id="playAgainBtn" class="hidden">Girar Novamente</button>
+        <button onclick="window.location.href='./index.html'">Voltar</button>
+
+    </div>
+
+    <script>
+
+        const wheel = document.getElementById("wheel");
+        const spinBtn = document.getElementById("spinBtn");
+        const questionArea = document.getElementById("questionArea");
+        const question = document.getElementById("question");
+        const options = document.getElementById("options");
+        const timerEl = document.getElementById("time");
+        const feedback = document.getElementById("feedback");
+        const playAgainBtn = document.getElementById("playAgainBtn");
+
+        let correctAnswer = 0;
+        let timer = null;
+        let timeLeft = 30;
+        let spinning = false;
+        let answered = false;
+
+
+
+        function generateQuestion() {
+
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+
+            correctAnswer = num1 * num2;
+
+            question.textContent = `Quanto é ${num1} × ${num2}?`;
+
+            let answers = [correctAnswer];
+
+            while (answers.length < 4) {
+
+                let variation = Math.floor(Math.random() * 10) - 5;
+                let wrong = correctAnswer + variation;
+
+                if (wrong > 0 && !answers.includes(wrong)) {
+                    answers.push(wrong);
+                }
+
+            }
+
+            answers = answers.sort(() => Math.random() - 0.5);
+
+            options.innerHTML = "";
+
+            answers.forEach(ans => {
+
+                const btn = document.createElement("button");
+
+                btn.textContent = ans;
+
+                btn.onclick = () => checkAnswer(ans);
+
+                options.appendChild(btn);
+
+            });
+
+        }
+
+
+
+        function checkAnswer(answer) {
+
+            if (answered) return;
+
+            answered = true;
+
+            clearInterval(timer);
+
+            if (answer === correctAnswer) {
+
+                feedback.innerHTML = "🎉 Parabéns! Você acertou! 🍭";
+
+            } else {
+
+                feedback.innerHTML = `❌ Ops! A resposta correta era ${correctAnswer}`;
+
+            }
+
+            feedback.classList.remove("hidden");
+
+            playAgainBtn.classList.remove("hidden");
+
+        }
+
+
+
+        function startTimer() {
+
+            clearInterval(timer);
+
+            timeLeft = 30;
+
+            timerEl.textContent = timeLeft;
+
+            timer = setInterval(() => {
+
+                if (timeLeft <= 0) {
+
+                    clearInterval(timer);
+
+                    timerEl.textContent = "⏰";
+
+                    feedback.innerHTML = "⏰ Tempo esgotado!";
+
+                    feedback.classList.remove("hidden");
+
+                    playAgainBtn.classList.remove("hidden");
+
+                    answered = true;
+
+                    return;
+
+                }
+
+                timeLeft--;
+
+                timerEl.textContent = timeLeft;
+
+            }, 1000);
+
+        }
+
+
+
+        spinBtn.onclick = () => {
+
+            if (spinning) return;
+
+            spinning = true;
+
+            answered = false;
+
+            clearInterval(timer);
+
+            feedback.classList.add("hidden");
+
+            playAgainBtn.classList.add("hidden");
+
+            questionArea.classList.add("hidden");
+
+            const rotation = Math.floor(Math.random() * 360) + 720;
+
+            wheel.style.transform = `rotate(${rotation}deg)`;
+
+            spinBtn.disabled = true;
+
+            setTimeout(() => {
+
+                wheel.textContent = "🎲";
+
+                questionArea.classList.remove("hidden");
+
+                generateQuestion();
+
+                startTimer();
+
+                spinning = false;
+
+                spinBtn.disabled = false;
+
+            }, 2000);
+
+        };
+
+
+
+        playAgainBtn.onclick = () => {
+
+            wheel.textContent = "?";
+
+            questionArea.classList.add("hidden");
+
+            feedback.classList.add("hidden");
+
+            playAgainBtn.classList.add("hidden");
+
+            clearInterval(timer);
+
+            timerEl.textContent = 30;
+
+        };
+
+    </script>
+
+</body>
+
+</html>
